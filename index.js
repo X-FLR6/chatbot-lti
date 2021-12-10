@@ -3,19 +3,27 @@ const path = require('path')
 const routes = require('./src/routes')
 
 const lti = require('ltijs').Provider
+const Database = require('ltijs-sequelize')
+
+const db = new Database('chatbot-lti-dev', 'postgres', 'password',
+  {
+    host: 'localhost',
+    dialect: 'postgres',
+    logging: false
+  })
 
 // Setup
 lti.setup(process.env.LTI_KEY,
   {
-    url: 'mongodb://' + process.env.DB_HOST + '/' + process.env.DB_NAME + '?authSource=admin',
-    connection: { user: process.env.DB_USER, pass: process.env.DB_PASS }
-  }, {
+    plugin: db // Passing db object to plugin field
+  },
+  {
     staticPath: path.join(__dirname, './public'), // Path to static files
     cookies: {
-      secure: false, // Set secure to true if the testing platform is in a different domain and https is being used
-      sameSite: '' // Set sameSite to 'None' if the testing platform is in a different domain and https is being used
+      secure: true, // Set secure to true if the testing platform is in a different domain and https is being used
+      sameSite: 'None' // Set sameSite to 'None' if the testing platform is in a different domain and https is being used
     },
-    devMode: true // Set DevMode to true if the testing platform is in a different domain and https is not being used
+    devMode: false // Set DevMode to true if the testing platform is in a different domain and https is not being used
   })
 
 // When receiving successful LTI launch redirects to app
@@ -38,14 +46,14 @@ const setup = async () => {
   /**
    * Register platform
    */
-  /* await lti.registerPlatform({
-    url: 'http://localhost/moodle',
-    name: 'Platform',
-    clientId: 'CLIENTID',
-    authenticationEndpoint: 'http://localhost/moodle/mod/lti/auth.php',
-    accesstokenEndpoint: 'http://localhost/moodle/mod/lti/token.php',
-    authConfig: { method: 'JWK_SET', key: 'http://localhost/moodle/mod/lti/certs.php' }
-  }) */
+  await lti.registerPlatform({
+    url: 'https://humbleschool.moodlecloud.com',
+    name: 'HumbleSchool Moodle',
+    clientId: 't8NTZY9X8xAsKzl',
+    authenticationEndpoint: 'https://humbleschool.moodlecloud.com/mod/lti/auth.php',
+    accesstokenEndpoint: 'https://humbleschool.moodlecloud.com/mod/lti/token.php',
+    authConfig: { method: 'JWK_SET', key: 'https://humbleschool.moodlecloud.com/mod/lti/certs.php' }
+  })
 }
 
 setup()
