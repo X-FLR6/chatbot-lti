@@ -5,9 +5,9 @@ const routes = require('./src/routes')
 const lti = require('ltijs').Provider
 const Database = require('ltijs-sequelize')
 
-const db = new Database('chatbot-lti-dev', 'postgres', 'password',
+const db = new Database(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASS,
   {
-    host: 'localhost',
+    host: process.env.DB_HOST,
     dialect: 'postgres',
     logging: false
   })
