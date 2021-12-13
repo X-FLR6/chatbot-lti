@@ -35,12 +35,20 @@ lti.setup(
 
 // When receiving successful LTI launch redirects to app
 lti.onConnect(async (token, req, res) => {
-  return res.sendFile(path.join(__dirname, "./public/index.html"));
+  const context = res.locals.context;
+  const id = context.custom.id;
+  const type = context.custom.type;
+  const identifier = `lti_moodle_${context.user}`;
+  return res.redirect(
+    `${process.env.CONTENT_DOMAIN}/${type}s/${id}/${identifier}`
+  );
 });
 
 // When receiving deep linking request redirects to deep screen
 lti.onDeepLinking(async (token, req, res) => {
-  return lti.redirect(res, "/deeplink", { newResource: true });
+  return lti.redirect(res, process.env.DEEPLINK_URL, {
+    newResource: true,
+  });
 });
 
 // Setting up routes

@@ -71,11 +71,8 @@ router.post("/deeplink", async (req, res) => {
 
     const items = {
       type: "ltiResourceLink",
-      title: "Ltijs Demo",
-      custom: {
-        name: resource.name,
-        value: resource.value,
-      },
+      title: resource.name,
+      custom: resource,
     };
 
     const form = await lti.DeepLinking.createDeepLinkingForm(
@@ -89,25 +86,6 @@ router.post("/deeplink", async (req, res) => {
     console.log(err.message);
     return res.status(500).send(err.message);
   }
-});
-
-// Return available deep linking resources
-router.get("/resources", async (req, res) => {
-  const resources = [
-    {
-      name: "Resource1",
-      value: "value1",
-    },
-    {
-      name: "Resource2",
-      value: "value2",
-    },
-    {
-      name: "Resource3",
-      value: "value3",
-    },
-  ];
-  return res.send(resources);
 });
 
 // Get user and context information
