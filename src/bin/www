@@ -1,0 +1,60 @@
+#!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-var-requires */
+
+/**
+ * Module dependencies.
+ */
+require("dotenv").config();
+
+const { default: app } = require("../app");
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+const port = normalizePort(process.env.PORT || "3000");
+
+// Setup function
+const setup = async () => {
+  /**
+   * Listen on provided port, on all network interfaces.
+   */
+  await app.deploy({ port });
+
+  /**
+   * Register platform
+   */
+  await app.registerPlatform({
+    url: "http://localhost:8888/moodle40",
+    name: "HumbleSchool Moodle",
+    clientId: "3cKT3ICpZT2f5tY",
+    authenticationEndpoint: "http://localhost:8888/moodle40/mod/lti/auth.php",
+    accesstokenEndpoint: "http://localhost:8888/moodle40/mod/lti/token.php",
+    authConfig: {
+      method: "JWK_SET",
+      key: "http://localhost:8888/moodle40/mod/lti/certs.php",
+    },
+  });
+};
+
+setup();
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  const port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}

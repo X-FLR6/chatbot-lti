@@ -1,10 +1,8 @@
-require("dotenv").config();
+import { Provider as lti } from "ltijs";
+import Database from "ltijs-sequelize";
+import * as path from "path";
 
-const path = require("path");
-const routes = require("./src/routes");
-
-const lti = require("ltijs").Provider;
-const Database = require("ltijs-sequelize");
+import routes from "./routes";
 
 const db = new Database(
   process.env.DB_NAME,
@@ -19,7 +17,7 @@ const db = new Database(
 
 // Setup
 lti.setup(
-  process.env.LTI_KEY,
+  process.env.LTI_KEY as string,
   {
     plugin: db, // Passing db object to plugin field
   },
@@ -46,7 +44,7 @@ lti.onConnect(async (token, req, res) => {
 
 // When receiving deep linking request redirects to deep screen
 lti.onDeepLinking(async (token, req, res) => {
-  return lti.redirect(res, process.env.DEEPLINK_URL, {
+  return lti.redirect(res, process.env.DEEPLINK_URL as string, {
     newResource: true,
   });
 });
@@ -54,26 +52,4 @@ lti.onDeepLinking(async (token, req, res) => {
 // Setting up routes
 lti.app.use(routes);
 
-// Setup function
-const setup = async () => {
-  await lti.deploy({ port: process.env.PORT });
-
-  /**
-   * Register platform
-   */
-  await lti.registerPlatform({
-    url: "https://humbleschool.moodlecloud.com",
-    name: "HumbleSchool Moodle",
-    clientId: "t8NTZY9X8xAsKzl",
-    authenticationEndpoint:
-      "https://humbleschool.moodlecloud.com/mod/lti/auth.php",
-    accesstokenEndpoint:
-      "https://humbleschool.moodlecloud.com/mod/lti/token.php",
-    authConfig: {
-      method: "JWK_SET",
-      key: "https://humbleschool.moodlecloud.com/mod/lti/certs.php",
-    },
-  });
-};
-
-setup();
+export default lti;
