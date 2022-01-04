@@ -44,7 +44,7 @@ declare module "ltijs" {
     dynRegRoute(): string;
     loginRoute(): string;
 
-    whitelist(...routes: string[]): string[];
+    whitelist(...routes: (string | RegExp)[]): string[];
 
     registerPlatform(_platform: PlatformConfig): Promise<Platform>;
     getPlatform(

@@ -1,6 +1,8 @@
 import express from "express";
 import * as path from "path";
 
+import adminRouter from "./admin";
+
 const router = express.Router();
 
 // Requiring Ltijs
@@ -89,6 +91,7 @@ router.post("/deeplink", async (req, res) => {
       items,
       { message: "Successfully Registered" }
     );
+    console.log(form);
     if (form) return res.send(form);
     return res.sendStatus(500);
   } catch (err) {
@@ -113,6 +116,8 @@ router.get("/info", async (req, res) => {
 
   return res.send(info);
 });
+
+router.use("/admin", adminRouter);
 
 // Wildcard route to deal with redirecting to React routes
 router.get("*", (req, res) =>

@@ -31,8 +31,11 @@ lti.setup(
   }
 );
 
+lti.whitelist(new RegExp(/^\/admin/));
+
 // When receiving successful LTI launch redirects to app
-lti.onConnect(async (token, req, res) => {
+lti.onConnect(async (token, req, res, next) => {
+  if (req.originalUrl.startsWith("admin")) return next();
   const context = res.locals.context;
   const id = context.custom.id;
   const type = context.custom.type;

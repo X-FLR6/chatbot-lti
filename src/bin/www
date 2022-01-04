@@ -6,7 +6,7 @@
  */
 require("dotenv").config();
 
-const { default: app } = require("../app");
+const { default: app } = require("../lti");
 
 /**
  * Get port from environment and store in Express.
@@ -20,21 +20,6 @@ const setup = async () => {
    * Listen on provided port, on all network interfaces.
    */
   await app.deploy({ port });
-
-  /**
-   * Register platform
-   */
-  await app.registerPlatform({
-    url: "http://localhost:8888/moodle40",
-    name: "HumbleSchool Moodle",
-    clientId: "3cKT3ICpZT2f5tY",
-    authenticationEndpoint: "http://localhost:8888/moodle40/mod/lti/auth.php",
-    accesstokenEndpoint: "http://localhost:8888/moodle40/mod/lti/token.php",
-    authConfig: {
-      method: "JWK_SET",
-      key: "http://localhost:8888/moodle40/mod/lti/certs.php",
-    },
-  });
 };
 
 setup();

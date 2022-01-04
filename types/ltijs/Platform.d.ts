@@ -76,5 +76,5 @@ export interface Platform {
 
   platformAccessToken(scopes: string): Promise<string | false>;
 
-  remove(): Promise<boolean>;
+  delete(): Promise<boolean>;
 }
