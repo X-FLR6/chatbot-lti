@@ -16,8 +16,9 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
-    "ltijs": "^5.6.5",
+    "ltijs": "^5.8.6",
     "ltijs-sequelize": "^2.4.4",
+    "redis": "^4.0.3",
     "superagent": "^7.0.1"
   },
   "devDependencies": {

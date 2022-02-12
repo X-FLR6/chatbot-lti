@@ -1,7 +1,10 @@
 import express from "express";
 import jwt from "jsonwebtoken";
+import { IdToken } from "ltijs";
 
 import lti from "../lti";
+import getRCache from "../utils";
+
 const router = express.Router();
 const AUTH_HEADER = "authorization" as const;
 
@@ -67,6 +70,65 @@ router.post("/unregister_platform", async (req, res) => {
   } catch (err) {
     console.log((err as Error).message);
     return res.status(500).send((err as Error).message);
+  }
+});
+
+// Grading route
+router.post("/grade", async (req, res) => {
+  try {
+    console.log(req.body);
+
+    const { cacheId, score, maxScore } = req.body;
+
+    const rCache = await getRCache();
+
+    const _idToken = await rCache.read(cacheId);
+    if (_idToken) {
+      const idToken = JSON.parse(_idToken) as IdToken; // IdToken
+
+      console.log(JSON.stringify(idToken, null, 2));
+
+      // Creating Grade object
+      const gradeObj = {
+        userId: idToken.user,
+        scoreGiven: score,
+        scoreMaximum: maxScore,
+        activityProgress: "Completed",
+        gradingProgress: "FullyGraded",
+      };
+
+      // Selecting lineItem ID
+      let lineItemId = idToken.platformContext.endpoint?.lineitem; // Attempting to retrieve it from idToken
+      if (!lineItemId) {
+        const response = await lti.Grade.getLineItems(idToken, {
+          resourceLinkId: true,
+        });
+        const lineItems = response.lineItems;
+        if (lineItems.length === 0) {
+          // Creating line item if there is none
+          console.log("Creating new line item");
+          const newLineItem = {
+            scoreMaximum: maxScore,
+            label: "Grade",
+            tag: "grade",
+            resourceLinkId: idToken.platformContext.resource.id,
+          };
+          const lineItem = await lti.Grade.createLineItem(idToken, newLineItem);
+          lineItemId = lineItem.id;
+        } else lineItemId = lineItems[0].id;
+      }
+
+      // Sending Grade
+      const responseGrade = await lti.Grade.submitScore(
+        idToken,
+        lineItemId,
+        gradeObj
+      );
+      return res.send(responseGrade);
+    }
+  } catch (err) {
+    console.log((err as Error).message);
+    return res.status(500).send({ err: (err as Error).message });
   }
 });
 

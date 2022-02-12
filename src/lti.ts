@@ -1,8 +1,10 @@
 import { Provider as lti } from "ltijs";
 import Database from "ltijs-sequelize";
 import * as path from "path";
+import superagent from "superagent";
 
 import routes from "./routes";
+import getRCache from "./utils";
 
 const db = new Database(
   process.env.DB_NAME,
@@ -14,6 +16,9 @@ const db = new Database(
     logging: false,
   }
 );
+
+const integrationDataUpdateURL =
+  `${process.env.SERVER_DOMAIN}/integrations/lti/data` as const;
 
 // Setup
 lti.setup(
@@ -36,10 +41,34 @@ lti.whitelist(new RegExp(/^\/admin/));
 // When receiving successful LTI launch redirects to app
 lti.onConnect(async (token, req, res, next) => {
   if (req.originalUrl.startsWith("admin")) return next();
+
+  const rCache = await getRCache();
+
   const context = res.locals.context;
   const id = context.custom.id;
   const type = context.custom.type;
   const identifier = `lti_moodle_${context.user}`;
+
+  console.log({ token: res.locals.token });
+
+  const cacheId = await rCache.cache(JSON.stringify(res.locals.token));
+
+  const serverPayload = {
+    recordId: id,
+    recordType: type == "chat" ? "flow" : "flowSequence",
+    identifier: identifier,
+    cacheId,
+  };
+
+  try {
+    await superagent
+      .post(integrationDataUpdateURL)
+      .set("Accept", "application/json")
+      .send(serverPayload);
+  } catch {
+    // fail silently
+    console.log("Could not send cacheId to server.");
+  }
   return res.redirect(
     `${process.env.CONTENT_DOMAIN}/${type}s/${id}/${identifier}`
   );

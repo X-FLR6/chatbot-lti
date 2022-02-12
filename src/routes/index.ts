@@ -4,7 +4,6 @@ import * as path from "path";
 import adminRouter from "./admin";
 
 const router = express.Router();
-
 // Requiring Ltijs
 import { Provider as lti } from "ltijs";
 
@@ -14,54 +13,6 @@ interface UserInfo {
   roles?: string[];
   context?: unknown;
 }
-
-// Grading route
-router.post("/grade", async (req, res) => {
-  try {
-    const idToken = res.locals.token; // IdToken
-    const score = req.body.grade; // User numeric score sent in the body
-    // Creating Grade object
-    const gradeObj = {
-      userId: idToken.user,
-      scoreGiven: score,
-      scoreMaximum: 100,
-      activityProgress: "Completed",
-      gradingProgress: "FullyGraded",
-    };
-
-    // Selecting lineItem ID
-    let lineItemId = idToken.platformContext.endpoint.lineitem; // Attempting to retrieve it from idToken
-    if (!lineItemId) {
-      const response = await lti.Grade.getLineItems(idToken, {
-        resourceLinkId: true,
-      });
-      const lineItems = response.lineItems;
-      if (lineItems.length === 0) {
-        // Creating line item if there is none
-        console.log("Creating new line item");
-        const newLineItem = {
-          scoreMaximum: 100,
-          label: "Grade",
-          tag: "grade",
-          resourceLinkId: idToken.platformContext.resource.id,
-        };
-        const lineItem = await lti.Grade.createLineItem(idToken, newLineItem);
-        lineItemId = lineItem.id;
-      } else lineItemId = lineItems[0].id;
-    }
-
-    // Sending Grade
-    const responseGrade = await lti.Grade.submitScore(
-      idToken,
-      lineItemId,
-      gradeObj
-    );
-    return res.send(responseGrade);
-  } catch (err) {
-    console.log((err as Error).message);
-    return res.status(500).send({ err: (err as Error).message });
-  }
-});
 
 // Names and Roles route
 router.get("/members", async (req, res) => {
