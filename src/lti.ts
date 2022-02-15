@@ -6,16 +6,34 @@ import superagent from "superagent";
 import routes from "./routes";
 import getRCache from "./utils";
 
-const db = new Database(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASS,
-  {
-    host: process.env.DB_HOST,
-    dialect: "postgres",
-    logging: false,
-  }
-);
+console.log({
+  DATABASE_URL: process.env.DATABASE_URL,
+  B: process.env.DATABASE_URL == null,
+});
+
+const db =
+  process.env.DATABASE_URL == null
+    ? new Database(
+        process.env.DB_NAME,
+        process.env.DB_USER,
+        process.env.DB_PASS,
+        {
+          host: process.env.DB_HOST,
+          dialect: "postgres",
+          logging: false,
+        }
+      )
+    : new Database(process.env.DATABASE_URL, {
+        dialect: "postgres",
+        dialectOptions: {
+          // `ssl` access needed for Heroku paid DB plan.
+          ssl: {
+            // Without this line, connection seems to fail.
+            // See https://github.com/sequelize/sequelize/issues/12083.
+            rejectUnauthorized: false,
+          },
+        },
+      });
 
 const integrationDataUpdateURL =
   `${process.env.SERVER_DOMAIN}/integrations/lti/data` as const;

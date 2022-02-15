@@ -5,7 +5,15 @@ class RCache {
   redisClient;
   connected: boolean;
   constructor() {
-    this.redisClient = createClient();
+    this.redisClient = createClient({
+      url: process.env.REDIS_TLS_URL ?? undefined,
+      socket: process.env.REDIS_TLS_URL
+        ? {
+            tls: true,
+            rejectUnauthorized: false,
+          }
+        : {},
+    });
     this.connected = false;
     this.redisClient.on("error", (err) =>
       console.log("Redis Client Error", err)
