@@ -30,7 +30,7 @@ router.post("/register_platform", async (req, res) => {
       name: params.name,
       url: params.url,
       clientId: params.clientId,
-      authenticationEndpoint: params.authRequestUrl,
+      authenticationEndpoint: params.authUrl,
       accesstokenEndpoint: params.accessTokenUrl,
       authConfig: {
         method: params.authConfigMethod ?? "JWK_SET",
