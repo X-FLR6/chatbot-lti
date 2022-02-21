@@ -62,12 +62,13 @@ lti.onConnect(async (token, req, res, next) => {
 
   const rCache = await getRCache();
 
-  const context = res.locals.context;
-  const id = context.custom.id;
-  const type = context.custom.type;
-  const identifier = `lti_moodle_${context.user}`;
+  const platformAug = res.locals.token.platformId;
 
-  console.log({ token: res.locals.token });
+  const context = res.locals.context;
+  const id: number = context.custom.id;
+  const type: "chat" | "chatSequence" = context.custom.type;
+  const settings: string | null = context.custom.settings;
+  const identifier = `lti_${platformAug}_${context.user}`;
 
   const cacheId = await rCache.cache(JSON.stringify(res.locals.token));
 
@@ -87,9 +88,14 @@ lti.onConnect(async (token, req, res, next) => {
     // fail silently
     console.log("Could not send cacheId to server.");
   }
-  return res.redirect(
-    `${process.env.CONTENT_DOMAIN}/${type}s/${id}/${identifier}`
-  );
+
+  const bareUrl = `${process.env.CONTENT_DOMAIN}/${type}s/${id}/${identifier}`;
+  const augQuery = `?t=aug`;
+  // NOTE: & is included as we already know that aug query will be there.
+  const settingQuery = settings ? `&s=${settings}` : "";
+  const url = `${bareUrl}${augQuery}${settingQuery}`;
+
+  return res.redirect(url);
 });
 
 // When receiving deep linking request redirects to deep screen

@@ -42,7 +42,6 @@ router.post("/deeplink", async (req, res) => {
       items,
       { message: "Successfully Registered" }
     );
-    console.log(form);
     if (form) return res.send(form);
     return res.sendStatus(500);
   } catch (err) {
