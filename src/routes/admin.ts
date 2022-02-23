@@ -76,8 +76,6 @@ router.post("/unregister_platform", async (req, res) => {
 // Grading route
 router.post("/grade", async (req, res) => {
   try {
-    console.log(req.body);
-
     const { cacheId, score, maxScore } = req.body;
 
     const rCache = await getRCache();
@@ -85,8 +83,6 @@ router.post("/grade", async (req, res) => {
     const _idToken = await rCache.read(cacheId);
     if (_idToken) {
       const idToken = JSON.parse(_idToken) as IdToken; // IdToken
-
-      console.log(JSON.stringify(idToken, null, 2));
 
       // Creating Grade object
       const gradeObj = {
@@ -106,7 +102,6 @@ router.post("/grade", async (req, res) => {
         const lineItems = response.lineItems;
         if (lineItems.length === 0) {
           // Creating line item if there is none
-          console.log("Creating new line item");
           const newLineItem = {
             scoreMaximum: maxScore,
             label: "Grade",

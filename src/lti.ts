@@ -6,11 +6,6 @@ import superagent from "superagent";
 import routes from "./routes";
 import getRCache from "./utils";
 
-console.log({
-  DATABASE_URL: process.env.DATABASE_URL,
-  B: process.env.DATABASE_URL == null,
-});
-
 const db =
   process.env.DATABASE_URL == null
     ? new Database(
